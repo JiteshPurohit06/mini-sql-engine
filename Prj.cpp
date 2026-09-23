@@ -588,11 +588,12 @@ void execute_query(const std::string& sql, const std::unordered_map<std::string,
 
         plan->open();
         std::cout << "--- Query Results ---\n";
-        bool found = false;
+        
+        size_t global_row_num = 1;
+
         while (auto batch = plan->next()) {
             for (size_t row = 0; row < batch->size; ++row) {
-                found = true;
-                std::cout << "Row " << row + 1 << " -> ";
+                std::cout << "Row " << global_row_num++ << " -> ";
                 for (const auto& pair : batch->columns) {
                     std::cout << pair.first << ": ";
                     if (pair.second->get_type() == DataType::INT32) {
@@ -609,7 +610,7 @@ void execute_query(const std::string& sql, const std::unordered_map<std::string,
                 std::cout << "\n";
             }
         }
-        if (!found) std::cout << "(No matching rows)\n";
+        if (global_row_num == 1) std::cout << "(No matching rows)\n";
         plan->close();
     } catch (const std::exception& e) {
         std::cerr << e.what() << "\n";
